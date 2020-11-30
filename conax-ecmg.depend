@@ -1,0 +1,116 @@
+# depslib dependency file v1.0
+1606416551 source:r:\conax-ecmg\conax_core.cpp
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<unistd.h>
+	<cstring>
+	"conax_core.h"
+	"aes.h"
+
+1606416551 r:\conax-ecmg\conax_core.h
+	<time.h>
+	<stdio.h>
+	<fstream>
+	<cstring>
+	<stdint.h>
+
+1606416551 source:r:\conax-ecmg\main.cpp
+	<stdio.h>
+	<winsock2.h>
+	"parser.h"
+
+1606416551 r:\conax-ecmg\parser.h
+	<stdint.h>
+
+1606418485 source:r:\conax-ecmg\parser.cpp
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<unistd.h>
+	<cstring>
+	"parser.h"
+	"conax_core.h"
+
+1602839322 r:\conax-ecmg\global.h
+
+1604403575 source:r:\temp\conax-ecmg\aes.c
+	<string.h>
+	"aes.h"
+
+1606391816 r:\temp\conax-ecmg\aes.h
+
+1606395324 source:r:\temp\conax-ecmg\conax_core.cpp
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<unistd.h>
+	<cstring>
+	"conax_core.h"
+	"aes.h"
+
+1606394711 r:\temp\conax-ecmg\conax_core.h
+	<time.h>
+	<stdio.h>
+	<fstream>
+	<cstring>
+	<stdint.h>
+
+1606394774 source:r:\temp\conax-ecmg\main.cpp
+	<stdio.h>
+	<winsock2.h>
+	"parser.h"
+
+1606394764 r:\temp\conax-ecmg\parser.h
+	<stdint.h>
+
+1606394862 source:r:\temp\conax-ecmg\parser.cpp
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<unistd.h>
+	<cstring>
+	"parser.h"
+	"conax_core.h"
+
+1606391816 source:r:\temp\conax-ecmg\aes.cpp
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+	"aes.h"
+
+1606416551 source:r:\conax-ecmg\aes.cpp
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+	"aes.h"
+
+1606416551 r:\conax-ecmg\aes.h
+
+1606416551 source:r:\cnx_ecmg_sql\aes.cpp
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+	"aes.h"
+
+1606416551 r:\cnx_ecmg_sql\aes.h
+
+1606735690 source:r:\cnx_ecmg_sql\parser.cpp
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<unistd.h>
+	<cstring>
+	"parser.h"
+	"conax_core.h"
+
+1606735705 r:\cnx_ecmg_sql\parser.h
+	<stdint.h>
+
+1606735027 r:\cnx_ecmg_sql\conax_core.h
+	<time.h>
+	<stdio.h>
+	<fstream>
+	<cstring>
+	<stdint.h>
+
