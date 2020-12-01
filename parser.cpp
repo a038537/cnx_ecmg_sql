@@ -144,7 +144,7 @@ if(debug == 1){
 }
     keyindex = acc[1];
     //for(int i = 0;i <= ans0202[4]+5;i++){ zurueck[i] = (ans0202[i] & 0xff);}
-    memcpy(&zurueck[0],&ans0202[0],0xd7);
+    memcpy(&zurueck[0],&ans0202[0],0xd8);
     if ((cpnum[1]&0x1) == 1){frame[0] = 0x1;}
     else {frame[0] = 0x00;}
     frame[1] = 0x00;

@@ -18,7 +18,7 @@
 #include "parser.h"
 
 int tx;
-char txbuffer[188];
+char txbuffer[255];
 
 uint8_t debug = 0;
 int timer =0;
