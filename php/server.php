@@ -20,14 +20,12 @@ if(!($sock = socket_create(AF_INET, SOCK_STREAM, 0)))
 
 echo "Socket created \n";
 
-
+//Set Socket options for re-use blocked ports & address
 if ( ! socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1)) 
 {
     echo socket_strerror(socket_last_error($sock)); 
     exit;
 }
-
-
 
 // Bind the source address
 if( !socket_bind($sock, $address , $port) )
@@ -116,33 +114,37 @@ while (true)
 		{
 			$input = socket_read($client_socks[$i] , 1024);
             
-            if ($input == null) 
+            if ($input == "quit\r\n" or $input == NULL) 
 			{
 				//zero length string meaning disconnected, remove and close the socket
 				unset($client_socks[$i]);
-				socket_close($client_socks[$i]);
+				@socket_close($client_socks[$i]);
             }
-
-            $n = trim($input);
-
+			
+			if ($input == "llik\r\n"){
+				unset($client_socks[$i]);
+				@socket_close($client_socks[$i]);
+				exit;
+			}
+			
+            //$n = trim($input);
+			//echo $n."\n\n\n";
             //$output = ">>> $input";
             
-	    echo "Sending output to client \n";
+			echo "Sending output to client \n";
 
-//	echo bin2hex($input);
-
-//for ($c = 0; $c < strlen($input); $c++) {
-//    echo str_pad(dechex(ord($input[$c])), 2, '0', STR_PAD_LEFT);
-//}
-	//$output = '';
-	hexdump($input,$output);
+			//hexdump($input,$output);
+			//$output = aes_cmac($input);
+			//$output = aes_cbc($input);
+			//$output = get_ecm();
+			
+			$output = parse(hex2bin('020001000E000E0002101F000100040B020000'));
+			$output = parse(hex2bin('0201010018000E0002101F000F00021002001900020001001000020064'));
+			
 			//send response to client
-			socket_write($client_socks[$i] , $output);
+			@socket_write($client_socks[$i] , $output);
 		}
     }
 }
-
-
-
 
 ?>
