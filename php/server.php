@@ -99,9 +99,9 @@ while (true)
 				}
 				
 				//Send Welcome message to client
-				$message = "Welcome to php socket server version 1.0 \n";
-				$message .= "Enter a message and press enter, and i shall reply back \n";
-				socket_write($client_socks[$i] , $message);
+				//$message = "Welcome to php socket server version 1.0 \n";
+				//$message .= "Enter a message and press enter, and i shall reply back \n";
+				//socket_write($client_socks[$i] , $message);
 				break;
             }
         }
@@ -116,9 +116,11 @@ while (true)
             
             if ($input == "quit\r\n" or $input == NULL) 
 			{
+				//return;
 				//zero length string meaning disconnected, remove and close the socket
 				unset($client_socks[$i]);
 				@socket_close($client_socks[$i]);
+				echo ("socket closed\n");
             }
 			
 			if ($input == "llik\r\n"){
@@ -127,22 +129,29 @@ while (true)
 				exit;
 			}
 			
+			echo hexdump($input);
+			
             //$n = trim($input);
 			//echo $n."\n\n\n";
             //$output = ">>> $input";
             
 			echo "Sending output to client \n";
 
-			//hexdump($input,$output);
+			
 			//$output = aes_cmac($input);
 			//$output = aes_cbc($input);
 			//$output = get_ecm();
 			
-			$output = parse(hex2bin('020001000E000E0002101F000100040B020000'));
-			$output = parse(hex2bin('0201010018000E0002101F000F00021002001900020001001000020064'));
+			//$output = parse(hex2bin('020001000E000E0002101F000100040B020000'));
+			//$output = parse(hex2bin('0201010018000E0002101F000F00021002001900020001001000020064'));
+
+			
+			$output = parse($input);
+									
+			echo hexdump($output);
 			
 			//send response to client
-			@socket_write($client_socks[$i] , $output);
+			socket_write($client_socks[$i] , $output);
 		}
     }
 }

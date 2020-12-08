@@ -50,18 +50,144 @@ function get_ecm(){
 };
 
 function parse(&$in){
-	$text = "OK => ";
+$ch_setup = 1;
+$ch_test = 2;
+$ch_status = 3;
+$ch_close = 4;
+$ch_error = 5;
+$str_setup = 0x0101;
+$cw_prov = 0x0201;
 
-	//$array = unpack('s*',$in);
-	
-		if(($in[1] == chr(0x0200)) and ($in[3] == chr(0x0100)) ){
-			echo " channel setup \n";
-		}
-		if ($in[1] == chr(0x0201)){
-			echo " Stream setup \n";
-		}
+$data = unpack("Cver/ntyp/nlen/C*",$in);
 
-	return $text;
+ 
+if($data['typ'] === $ch_setup){
+
+    for($i=1;$i<sizeof($data)-2;$i++){
+	        $val = $val << 8 & 0xFFFF;
+			$val = ($val | $data[$i]) & 0xFFFF;
+		if($val == 0x0e){
+        	//printf("channel-id: ");
+            $i = $i+3;
+            $chid = chr($data[$i]).chr($data[$i+1]);
+            //echo bin2hex($chid)." ";
+            $i++;
+        };
+        if($val == 0x1){
+        	//printf("SuperCas-ID: ");
+            $i = $i+3;
+            $casid = chr($data[$i]).chr($data[$i+1]).chr($data[$i+2]).chr($data[$i+3]);
+            //echo bin2hex($casid)." ";
+            $i+2;
+        };
+        	
+    };
+	return hex2bin('0200030051000E0002').$chid.hex2bin('00020001010016000200C80017000200C80003000200C80004000200C800050002FE0C00060002000000070002006400080002000000090002000A000A000101000B000102000C00020064');
+};
+
+if($data['typ'] === $str_setup){
+
+    for($i=1;$i<sizeof($data)-2;$i++){
+	        $val = $val << 8 & 0xFFFF;
+			$val = ($val | $data[$i]) & 0xFFFF;
+		if($val == 0x0e){
+        	//printf("channel-id: ");
+            $i = $i+3;
+            $chid = chr($data[$i]).chr($data[$i+1]);
+            //echo bin2hex($chid)." ";
+            $i++;
+        };
+        if($val == 0xf){
+        	//printf("Stream-ID: ");
+            $i = $i+3;
+            $strid = chr($data[$i]).chr($data[$i+1]);
+            //echo bin2hex($strid)." ";
+            $i++;
+        };
+        if($val == 0x19){
+        	//printf("ECM-ID: ");
+            $i = $i+3;
+            $ecmid = chr($data[$i]).chr($data[$i+1]);
+            //echo bin2hex($ecmid)." ";
+            $i++;
+        };        	
+        if($val == 0x10){
+        	//printf("CP-duration: ");
+            $i = $i+3;
+            $dura = chr($data[$i]).chr($data[$i+1]);
+            //echo bin2hex($dura)." ";
+            $i++;
+        };
+};
+
+	return hex2bin('0201030017000E0002').$chid.hex2bin('000f0002').$strid.hex2bin('00190002').$ecmid.hex2bin('0011000100');
+};
+
+if($data['typ'] == $cw_prov){
+    for($i=1;$i<sizeof($data)-2;$i++){
+	        $val = $val << 8 & 0xFFFF;
+			$val = ($val | $data[$i]) & 0xFFFF;
+
+		if($val == 0x0e){
+        	//printf("channel-id: ");
+            $i = $i+3;
+            $chid = chr($data[$i]).chr($data[$i+1]);
+            //echo bin2hex($chid)." ";
+            $i++;
+        };
+
+		if($val == 0x0d){
+        	//printf("Access-criteria: ");
+            $i++;
+   	        $acclen = $data[$i] << 8 | $data[$i+1] & 0xFFFF;
+			//printf('%d ',$acclen);
+            $i=$i+2;
+            for($j=0;$j<$acclen;$j++){
+            	$acc = $acc.chr($data[$i]);
+                $i++;
+            };
+            //echo bin2hex($acc)." ";
+            $i--;
+        };
+
+		if($val == 0x14){
+        	$cw ='';
+            $i = $i+3;
+   	        $odd = $data[$i] << 8 | $data[$i+1] & 0xFFFF;
+            $i=$i+2;
+            for($j=0;$j<8;$j++){
+            	$cw = $cw.chr($data[$i]);
+                $i++;
+            };
+            
+            if($odd % 2 == 0){
+            	$cw0 = $cw;
+            } else {
+            	$cw1 = $cw;
+            };
+            $i--;
+        };
+        
+        if($val == 0xf){
+        	//printf("Stream-ID: ");
+            $i = $i+3;
+            $strid = chr($data[$i]).chr($data[$i+1]);
+            
+            $i++;
+        };
+
+	};
+            echo "Channel-ID:      ".bin2hex($chid)."\n";
+			echo "Stream-ID:       ".bin2hex($strid)."\n";
+			echo "Access-criteria: ".bin2hex($acc)."\n";
+			echo "CW0:             ".bin2hex($cw0)."\n";
+            echo "CW1:             ".bin2hex($cw1)."\n";
+
+
+    //return 1;
+};
+
+
 };
 
 
