@@ -1,5 +1,34 @@
 <?php
 require_once 'lib/CryptLib/bootstrap.php'; 
+$GLOBALS['key'];
+
+function readkeys(){
+$servername = "10.24.10.78";
+$username = "root";
+$password = "gftty2478";
+$dbname = "neovision";
+
+	$conn = mysqli_connect($servername, $username, $password, $dbname);
+
+// Check connection
+if (!$conn) {
+  die("Connection failed: " . mysqli_connect_error());
+}
+//echo "Connected successfully";
+
+	if(date('n')%2){
+		$sql = "SELECT ecmkey FROM ecmg_keys where id = 21";
+	} else {
+		$sql = "SELECT ecmkey FROM ecmg_keys where id = 20";
+	};
+
+	$result = $conn->query($sql);
+	$row = $result->fetch_assoc();
+	$GLOBALS['key'] = hex2bin($row['ecmkey']);
+
+mysqli_close($conn);
+	
+};
 
 function aes_cmac(&$in,&$key){
 	$hasher = new CryptLib\MAC\Implementation\CMAC;
@@ -12,8 +41,8 @@ function hexdump(&$in){
 };
 
 function aes_cbc(&$in){
-	//key = get database key20 or key21 depending on month odd/even
-	$key = hex2bin('BBAA998877665544FFEEDDCC33221100');
+	global $key;
+	$key = $GLOBALS['key'];
 	$iv = hex2bin('00000000000000000000000000000000');
 	$cipher="AES-128-CBC";
 	$message_padded = $in;
@@ -21,7 +50,7 @@ function aes_cbc(&$in){
 		$message_padded = str_pad($message_padded,
         strlen($message_padded) + 16 - strlen($message_padded) % 16, "\xCC");
 	}
-	echo bin2hex($message_padded)."\n";
+	//echo bin2hex($message_padded)."\n";
 	$mac = aes_cmac($message_padded,$key);
 	return substr(openssl_encrypt($message_padded, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv),0,-16).$mac;
 };
@@ -38,22 +67,23 @@ function get_date(){
 };
 
 function get_ecm(&$chid,&$cw0,&$cw1,&$acc,&$cpnum){
-	//$cw1 = '1112131415161718';
-	//$cw0 = '0102030405060708';
-	//$acc = '1000001F';
-	//$chid = '1010';
-	//$accn = substr('00000000',0,-(strlen($acc))).$acc;
+
 	if(hexdec(bin2hex($cpnum)) & 1){
-		$header = hex2bin('81704470426420');
+		$header = hex2bin('817044704264');
 	} else {
-		$header = hex2bin('80704470426420');
+		$header = hex2bin('807044704264');
 	};
+	
+	if(date('n')%2){
+		$header .= hex2bin('21');
+	} else {
+		$header .= hex2bin('20');
+	};
+	
 	$ecm = hex2bin('2004').get_date().hex2bin('400f').$cw1.$cw0.hex2bin('2102').$chid.hex2bin('2204').$acc;
-	
-	return $header.aes_cbc($ecm);
-	//$ecm = aes_cbc(hex2bin("2004".get_date()."400F".$cw1.$cw0."2102".$chid."2204".$accn));
-	//return hexdump($ecm);
-	
+	$ecm = $header.aes_cbc($ecm);
+	return str_pad($ecm,254 - strlen($ecm),"\xFF");
+
 };
 
 function parse(&$in){
@@ -149,6 +179,7 @@ if($data['typ'] === $ch_setup){
 	return hex2bin('0200030051000E0002').$chid.hex2bin('00020001010016000200C80017000200C80003000200C80004000200C800050002FE0C00060002000000070002006400080002000000090002000A000A000101000B000102000C00020064');
 };
 
+
 if($data['typ'] === $str_setup){
 	return hex2bin('0201030017000E0002').$chid.hex2bin('000f0002').$strid.hex2bin('00190002').$ecmid.hex2bin('0011000100');
 };
@@ -160,20 +191,11 @@ if($data['typ'] == $cw_prov){
 			echo "CP-No:           ".bin2hex($cpnum)."\n";
 			echo "CW0:             ".bin2hex($cw0)."\n";
             echo "CW1:             ".bin2hex($cw1)."\n";
-			
+			echo "Used enc-key:    ".bin2hex($GLOBALS['key'])."\n\n";
 
-
-return hex2bin('02020200D2').
-hex2bin('000E0002').$chid. 
-hex2bin('000F0002').$strid. 
-hex2bin('00120002').$cpnum.
-hex2bin('001500BC475FFF1000').get_ecm($chid,$cw0,$cw1,$acc,$cpnum).
-hex2bin('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
+return hex2bin('02020200D2').hex2bin('000E0002').$chid.hex2bin('000F0002').$strid.hex2bin('00120002').$cpnum.hex2bin('001500BC475FFF1000').get_ecm($chid,$cw0,$cw1,$acc,$cpnum);
 
 };
 	echo "\n";
 };
-
-
-
 ?>

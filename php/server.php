@@ -102,6 +102,7 @@ while (true)
 				//$message = "Welcome to php socket server version 1.0 \n";
 				//$message .= "Enter a message and press enter, and i shall reply back \n";
 				//socket_write($client_socks[$i] , $message);
+				readkeys();
 				break;
             }
         }
@@ -122,6 +123,14 @@ while (true)
 				@socket_close($client_socks[$i]);
 				echo ("socket closed\n");
             }
+
+			if(date('i')%5 == 0 and $gotkey == 0){
+				readkeys();
+				echo "READKEYS!\n\n\n";
+				$gotkey = 1;
+			} else if(date('i')%5 != 0){
+				$gotkey = 0;
+			};
 			
 			if ($input == "llik\r\n"){
 				unset($client_socks[$i]);
@@ -130,26 +139,9 @@ while (true)
 			}
 			
 			echo hexdump($input);
-			
-            //$n = trim($input);
-			//echo $n."\n\n\n";
-            //$output = ">>> $input";
-            
 			echo "Sending output to client \n";
-
-			
-			//$output = aes_cmac($input);
-			//$output = aes_cbc($input);
-			//$output = get_ecm();
-			
-			//$output = parse(hex2bin('020001000E000E0002101F000100040B020000'));
-			//$output = parse(hex2bin('0201010018000E0002101F000F00021002001900020001001000020064'));
-
-			
 			$output = parse($input);
-									
 			echo hexdump($output);
-			
 			//send response to client
 			socket_write($client_socks[$i] , $output);
 		}
