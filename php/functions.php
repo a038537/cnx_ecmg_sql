@@ -13,7 +13,7 @@ function hexdump(&$in){
 
 function aes_cbc(&$in){
 	//key = get database key20 or key21 depending on month odd/even
-	$key = hex2bin('2b7e151628aed2a6abf7158809cf4f3c');
+	$key = hex2bin('BBAA998877665544FFEEDDCC33221100');
 	$iv = hex2bin('00000000000000000000000000000000');
 	$cipher="AES-128-CBC";
 	$message_padded = $in;
@@ -34,18 +34,25 @@ function get_date(){
 	$cnxdate = $cnxdate | (date('Y') - 1990) % 10;
 	$cnxdate = $cnxdate << 4;
 	$cnxdate = $cnxdate | date('n');
-	return dechex($cnxdate).date('is');
+	return hex2bin(dechex($cnxdate).date('is')); //!!!
 };
 
-function get_ecm(){
-	$cw1 = '1112131415161718';
-	$cw0 = '0102030405060708';
-	$acc = '1000001F';
-	$chid = '1010';
-	$accn = substr('00000000',0,-(strlen($acc))).$acc;
-
-	$ecm = aes_cbc(hex2bin("2004".get_date()."400F".$cw1.$cw0."2102".$chid."2204".$accn));
-	return hexdump($ecm);
+function get_ecm(&$chid,&$cw0,&$cw1,&$acc,&$cpnum){
+	//$cw1 = '1112131415161718';
+	//$cw0 = '0102030405060708';
+	//$acc = '1000001F';
+	//$chid = '1010';
+	//$accn = substr('00000000',0,-(strlen($acc))).$acc;
+	if(hexdec(bin2hex($cpnum)) & 1){
+		$header = hex2bin('81704470426420');
+	} else {
+		$header = hex2bin('80704470426420');
+	};
+	$ecm = hex2bin('2004').get_date().hex2bin('400f').$cw1.$cw0.hex2bin('2102').$chid.hex2bin('2204').$acc;
+	
+	return $header.aes_cbc($ecm);
+	//$ecm = aes_cbc(hex2bin("2004".get_date()."400F".$cw1.$cw0."2102".$chid."2204".$accn));
+	//return hexdump($ecm);
 	
 };
 
@@ -59,9 +66,6 @@ $str_setup = 0x0101;
 $cw_prov = 0x0201;
 
 $data = unpack("Cver/ntyp/nlen/C*",$in);
-
- 
-if($data['typ'] === $ch_setup){
 
     for($i=1;$i<sizeof($data)-2;$i++){
 	        $val = $val << 8 & 0xFFFF;
@@ -80,30 +84,13 @@ if($data['typ'] === $ch_setup){
             //echo bin2hex($casid)." ";
             $i+2;
         };
-        	
-    };
-	return hex2bin('0200030051000E0002').$chid.hex2bin('00020001010016000200C80017000200C80003000200C80004000200C800050002FE0C00060002000000070002006400080002000000090002000A000A000101000B000102000C00020064');
-};
-
-if($data['typ'] === $str_setup){
-
-    for($i=1;$i<sizeof($data)-2;$i++){
-	        $val = $val << 8 & 0xFFFF;
-			$val = ($val | $data[$i]) & 0xFFFF;
-		if($val == 0x0e){
-        	//printf("channel-id: ");
-            $i = $i+3;
-            $chid = chr($data[$i]).chr($data[$i+1]);
-            //echo bin2hex($chid)." ";
-            $i++;
-        };
         if($val == 0xf){
         	//printf("Stream-ID: ");
             $i = $i+3;
             $strid = chr($data[$i]).chr($data[$i+1]);
             //echo bin2hex($strid)." ";
             $i++;
-        };
+        }; 
         if($val == 0x19){
         	//printf("ECM-ID: ");
             $i = $i+3;
@@ -118,26 +105,16 @@ if($data['typ'] === $str_setup){
             //echo bin2hex($dura)." ";
             $i++;
         };
-};
-
-	return hex2bin('0201030017000E0002').$chid.hex2bin('000f0002').$strid.hex2bin('00190002').$ecmid.hex2bin('0011000100');
-};
-
-if($data['typ'] == $cw_prov){
-    for($i=1;$i<sizeof($data)-2;$i++){
-	        $val = $val << 8 & 0xFFFF;
-			$val = ($val | $data[$i]) & 0xFFFF;
-
-		if($val == 0x0e){
-        	//printf("channel-id: ");
+        if($val == 0x12){
+        	//printf("CP-num: ");
             $i = $i+3;
-            $chid = chr($data[$i]).chr($data[$i+1]);
-            //echo bin2hex($chid)." ";
+            $cpnum = chr($data[$i]).chr($data[$i+1]);
+            //echo bin2hex($cpnum)." ";
             $i++;
         };
-
 		if($val == 0x0d){
         	//printf("Access-criteria: ");
+			$acc = '';
             $i++;
    	        $acclen = $data[$i] << 8 | $data[$i+1] & 0xFFFF;
 			//printf('%d ',$acclen);
@@ -149,8 +126,7 @@ if($data['typ'] == $cw_prov){
             //echo bin2hex($acc)." ";
             $i--;
         };
-
-		if($val == 0x14){
+ 		if($val == 0x14){
         	$cw ='';
             $i = $i+3;
    	        $odd = $data[$i] << 8 | $data[$i+1] & 0xFFFF;
@@ -167,28 +143,37 @@ if($data['typ'] == $cw_prov){
             };
             $i--;
         };
-        
-        if($val == 0xf){
-        	//printf("Stream-ID: ");
-            $i = $i+3;
-            $strid = chr($data[$i]).chr($data[$i+1]);
-            
-            $i++;
-        };
+    };
+	
+if($data['typ'] === $ch_setup){
+	return hex2bin('0200030051000E0002').$chid.hex2bin('00020001010016000200C80017000200C80003000200C80004000200C800050002FE0C00060002000000070002006400080002000000090002000A000A000101000B000102000C00020064');
+};
 
-	};
+if($data['typ'] === $str_setup){
+	return hex2bin('0201030017000E0002').$chid.hex2bin('000f0002').$strid.hex2bin('00190002').$ecmid.hex2bin('0011000100');
+};
+
+if($data['typ'] == $cw_prov){
             echo "Channel-ID:      ".bin2hex($chid)."\n";
 			echo "Stream-ID:       ".bin2hex($strid)."\n";
 			echo "Access-criteria: ".bin2hex($acc)."\n";
+			echo "CP-No:           ".bin2hex($cpnum)."\n";
 			echo "CW0:             ".bin2hex($cw0)."\n";
             echo "CW1:             ".bin2hex($cw1)."\n";
+			
 
 
-    //return 1;
+return hex2bin('02020200D2').
+hex2bin('000E0002').$chid. 
+hex2bin('000F0002').$strid. 
+hex2bin('00120002').$cpnum.
+hex2bin('001500BC475FFF1000').get_ecm($chid,$cw0,$cw1,$acc,$cpnum).
+hex2bin('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
+
+};
+	echo "\n";
 };
 
-
-};
 
 
 ?>
