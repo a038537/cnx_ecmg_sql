@@ -1,20 +1,30 @@
 <?php
 require_once 'lib/CryptLib/bootstrap.php'; 
-$GLOBALS['key'];
+
+
+function ecco($in){
+	global $config;
+	$echo = $config['echo'];
+	if($echo){
+		echo $in;
+	};
+};
+
 
 function readkeys(){
-$servername = "10.24.10.78";
-$username = "root";
-$password = "gftty2478";
-$dbname = "neovision";
+	global $config;
+	$servername = $config['servername']; 
+	$username = $config['dbusername'];
+	$password = $config['dbpass'];
+	$dbname = $config['dbname'];
 
 	$conn = mysqli_connect($servername, $username, $password, $dbname);
 
-// Check connection
-if (!$conn) {
-  die("Connection failed: " . mysqli_connect_error());
-}
-//echo "Connected successfully";
+	// Check connection
+	if (!$conn) {
+		die("Connection failed: " . mysqli_connect_error());
+	}
+	//echo "Connected successfully";
 
 	if(date('n')%2){
 		$sql = "SELECT ecmkey FROM ecmg_keys where id = 21";
@@ -25,8 +35,7 @@ if (!$conn) {
 	$result = $conn->query($sql);
 	$row = $result->fetch_assoc();
 	$GLOBALS['key'] = hex2bin($row['ecmkey']);
-
-mysqli_close($conn);
+	mysqli_close($conn);
 	
 };
 
@@ -192,13 +201,13 @@ if($data['typ'] === $str_setup){
 };
 
 if($data['typ'] == $cw_prov){
-            echo "Channel-ID:    ".bin2hex($chid)."\n";
-			echo "Stream-ID:     ".bin2hex($strid)."\n";
-			echo "Acs-criteria:  ".bin2hex($acc)."\n";
-			echo "CP-No:         ".bin2hex($cpnum)."\n";
-			echo "CW0:           ".bin2hex($cw0)."\n";
-            echo "CW1:           ".bin2hex($cw1)."\n";
-			echo "Used enc-key:  ".bin2hex($GLOBALS['key'])."\n\n";
+            ecco( "Channel-ID:    ".bin2hex($chid)."\n" );
+			ecco( "Stream-ID:     ".bin2hex($strid)."\n" );
+			ecco( "Acs-criteria:  ".bin2hex($acc)."\n" );
+			ecco( "CP-No:         ".bin2hex($cpnum)."\n" );
+			ecco( "CW0:           ".bin2hex($cw0)."\n" );
+            ecco( "CW1:           ".bin2hex($cw1)."\n" );
+			ecco( "Used enc-key:  ".bin2hex($GLOBALS['key'])."\n\n" );
 
 return hex2bin('02020200D2').hex2bin('000E0002').$chid.hex2bin('000F0002').$strid.hex2bin('00120002').$cpnum.hex2bin('001500BC475FFF1000').get_ecm($chid,$cw0,$cw1,$acc,$cpnum);
 
@@ -211,6 +220,6 @@ if($data['typ'] == 0x0104){
 if($data['typ'] == 0x0004){
 	return "close_ch";
 };
-	echo "\n";
+	ecco( "\n" );
 };
 ?>

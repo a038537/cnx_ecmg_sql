@@ -1,13 +1,13 @@
 <?php
-
+include './config.php';
 include './functions.php';
-
+global $config;
 error_reporting(~E_NOTICE);
 set_time_limit (0);
 
-$address = "127.0.0.1";
-$port = 8888;
-$max_clients = 10;
+$address = $config['bindaddress'];
+$port = $config['bindport'];
+$max_clients = $config['max_clients'];
 
 
 if(!($sock = socket_create(AF_INET, SOCK_STREAM, 0)))
@@ -18,12 +18,12 @@ if(!($sock = socket_create(AF_INET, SOCK_STREAM, 0)))
     die("Couldn't create socket: [$errorcode] $errormsg \n");
 }
 
-echo "Socket created \n";
+ecco( "Socket created \n" );
 
 //Set Socket options for re-use blocked ports & address
 if ( ! socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1)) 
 {
-    echo socket_strerror(socket_last_error($sock)); 
+    ecco(  socket_strerror(socket_last_error($sock)) ); 
     exit;
 }
 
@@ -36,7 +36,7 @@ if( !socket_bind($sock, $address , $port) )
     die("Could not bind socket : [$errorcode] $errormsg \n");
 }
 
-echo "Socket bind OK \n";
+ecco( "Socket bind OK \n" );
 
 if(!socket_listen ($sock , 10))
 {
@@ -46,9 +46,9 @@ if(!socket_listen ($sock , 10))
     die("Could not listen on socket : [$errorcode] $errormsg \n");
 }
 
-echo "Socket listen OK \n";
+ecco(  "Socket listen OK \n" );
 
-echo "Waiting for incoming connections... \n";
+ecco(  "Waiting for incoming connections... \n" );
 
 //array of client sockets
 $client_socks = array();
@@ -95,7 +95,7 @@ while (true)
                 //display information about the client who is connected
 				if(socket_getpeername($client_socks[$i], $address, $port))
 				{
-					echo "Client $address : $port is now connected to us. \n";
+					ecco(  "Client $address : $port is now connected to us. \n" );
 				}
 				
 				//Send Welcome message to client
@@ -121,7 +121,7 @@ while (true)
 				//zero length string meaning disconnected, remove and close the socket
 				unset($client_socks[$i]);
 				@socket_close($client_socks[$i]);
-				echo ("socket closed\n");
+				ecco ("socket closed\n");
             }
 
 			if(date('i')%5 == 0 and $gotkey == 0){
@@ -137,8 +137,8 @@ while (true)
 				@socket_close($client_socks[$i]);
 				exit;
 			}
-			echo "------------------------------------------------\nincoming data...\n";
-			echo hexdump($input);
+			ecco(  "------------------------------------------------\nincoming data...\n" );
+			ecco(  hexdump($input) );
 			
 			$output = parse($input);
 			
@@ -146,12 +146,12 @@ while (true)
 			{
 				unset($client_socks[$i]);
 				@socket_close($client_socks[$i]);
-				echo ("socket closed\n");
+				ecco ("socket closed\n");
             } else {
 				//send response to client
 				socket_write($client_socks[$i] , $output);
-				echo "Sending output to client \n";
-				echo hexdump($output);
+				ecco(  "Sending output to client \n" );
+				ecco(  hexdump($output) );
 			}
 		}
     }
