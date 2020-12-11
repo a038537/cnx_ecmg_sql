@@ -126,7 +126,7 @@ while (true)
 
 			if(date('i')%5 == 0 and $gotkey == 0){
 				readkeys();
-				echo "READKEYS!\n\n\n";
+				//echo "READKEYS!\n\n\n";
 				$gotkey = 1;
 			} else if(date('i')%5 != 0){
 				$gotkey = 0;
@@ -137,13 +137,22 @@ while (true)
 				@socket_close($client_socks[$i]);
 				exit;
 			}
-			
+			echo "------------------------------------------------\nincoming data...\n";
 			echo hexdump($input);
-			echo "Sending output to client \n";
+			
 			$output = parse($input);
-			echo hexdump($output);
-			//send response to client
-			socket_write($client_socks[$i] , $output);
+			
+			if ($output == "close_ch") 
+			{
+				unset($client_socks[$i]);
+				@socket_close($client_socks[$i]);
+				echo ("socket closed\n");
+            } else {
+				//send response to client
+				socket_write($client_socks[$i] , $output);
+				echo "Sending output to client \n";
+				echo hexdump($output);
+			}
 		}
     }
 }

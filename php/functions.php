@@ -37,7 +37,14 @@ function aes_cmac(&$in,&$key){
 };
 
 function hexdump(&$in){
-	return bin2hex($in)."\n";
+	for($i=0;$i < strlen($in);$i++){
+		$val .= bin2hex($in[$i]).' ';
+			if($i % 16 == 15){
+				$val .= "\n";
+			};
+	};
+	return $val."\n\n";
+	//return bin2hex($in)."\n";
 };
 
 function aes_cbc(&$in){
@@ -185,16 +192,24 @@ if($data['typ'] === $str_setup){
 };
 
 if($data['typ'] == $cw_prov){
-            echo "Channel-ID:      ".bin2hex($chid)."\n";
-			echo "Stream-ID:       ".bin2hex($strid)."\n";
-			echo "Access-criteria: ".bin2hex($acc)."\n";
-			echo "CP-No:           ".bin2hex($cpnum)."\n";
-			echo "CW0:             ".bin2hex($cw0)."\n";
-            echo "CW1:             ".bin2hex($cw1)."\n";
-			echo "Used enc-key:    ".bin2hex($GLOBALS['key'])."\n\n";
+            echo "Channel-ID:    ".bin2hex($chid)."\n";
+			echo "Stream-ID:     ".bin2hex($strid)."\n";
+			echo "Acs-criteria:  ".bin2hex($acc)."\n";
+			echo "CP-No:         ".bin2hex($cpnum)."\n";
+			echo "CW0:           ".bin2hex($cw0)."\n";
+            echo "CW1:           ".bin2hex($cw1)."\n";
+			echo "Used enc-key:  ".bin2hex($GLOBALS['key'])."\n\n";
 
 return hex2bin('02020200D2').hex2bin('000E0002').$chid.hex2bin('000F0002').$strid.hex2bin('00120002').$cpnum.hex2bin('001500BC475FFF1000').get_ecm($chid,$cw0,$cw1,$acc,$cpnum);
 
+};
+
+if($data['typ'] == 0x0104){
+	return hex2bin('020105000C000E0002').$chid.hex2bin('000F0002').$strid;
+};
+
+if($data['typ'] == 0x0004){
+	return "close_ch";
 };
 	echo "\n";
 };
