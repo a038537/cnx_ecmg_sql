@@ -8,7 +8,7 @@ $config['max_clients'] = 10;
 //EMMG parameters
 $config['muxaddress'] = 'localhost';
 $config['muxport'] = 9999;
-
+$config['interval'] = 120;
 
 //SQLDB parameters
 $config['servername'] = '10.24.10.78'; 

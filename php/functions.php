@@ -330,7 +330,7 @@ function emm_unique(&$socket){
 		$key = aes_cmac($ppua,$syskey);
 		$emm = aes_cbc($emm,$key);
 		$emm = hex2bin('02021100DA0003000200010004000200010001000400000000000800020000000500BC475FFF100082704B000000').$ppua."\x70\x42\x64\x10".$emm;
-		$emm = str_pad($emm,325 - strlen($emm),"\xFF");
+		$emm = str_pad($emm,341 - strlen($emm),"\xFF");
 		
 		ecco("------------------------------------------------\n");
 		ecco(hexdump($emm));
@@ -366,7 +366,7 @@ function emm_shared(&$socket){
 		$key = aes_cmac($ppsa,$syskey);
 		$emm = aes_cbc($emm,$key);
 		$emm = hex2bin('02021100DA0003000200010004000200010001000400000000000800020000000500BC475FFF100082704B000000').$ppsa."\x70\x42\x64\x10".$emm;
-		$emm = str_pad($emm,325 - strlen($emm),"\xFF");
+		$emm = str_pad($emm,341 - strlen($emm),"\xFF");
 		
 		ecco("Shared EMM:\n");
 		ecco("PPSA:   ".prehex($row['ppsa'])."\n");

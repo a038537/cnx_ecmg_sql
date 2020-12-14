@@ -8,6 +8,7 @@ ecco( "Conax EMM-Generator\n\n\n" );
 
 $service_port = $config['muxport'];
 $address = $config['muxaddress'];
+$interval = $config['interval'];
 
 /* Einen TCP/IP-Socket erzeugen. */
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -42,7 +43,7 @@ while(1==1){
 		readkeys();
 	};
 	
-	sleep(120);
+	sleep($interval);
 };
 
 ecco( "Close socket...");
