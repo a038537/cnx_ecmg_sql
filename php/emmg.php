@@ -41,6 +41,7 @@ while(1==1){
 	if($timer < time()){
 		dbclean();
 		readkeys();
+		$timer = time()+900;
 	};
 	
 	sleep($interval);
