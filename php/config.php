@@ -13,7 +13,7 @@ $config['interval'] = 30;
 //SQLDB parameters
 $config['servername'] = '10.24.10.78'; 
 $config['dbusername'] = 'root';
-$config['dbpass'] = 'gftty2478';
+$config['dbpass'] = 'password';
 $config['dbname'] = 'neovision';
 
 //GLOBAL CONSOLE OUTPUT
